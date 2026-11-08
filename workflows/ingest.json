@@ -1,0 +1,96 @@
+{
+  "name": "LSA RAG - Ingest document",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "lsa_allowance",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "lsa allowance",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [-1856, 544],
+      "id": "d47cd6e2-beb8-4e1a-b638-18501e3185d1",
+      "name": "On form submission"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8nrag-vectors",
+          "mode": "list",
+          "cachedResultName": "n8nrag-vectors"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.4,
+      "position": [-1632, 432],
+      "id": "f459589c-9829-4d26-8a98-c3e51a5caf0c",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "binaryMode": "specificField",
+        "loader": "pdfLoader",
+        "binaryDataKey": "lsa_allowance",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "source",
+                "value": "Lump Sum Allowance document"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [-1496, 664],
+      "id": "df568e52-2688-493f-9114-5f059f731a3a",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [-1624, 664],
+      "id": "2cbfde9e-0d31-45cb-a0fe-8f15485ff3bb",
+      "name": "Embeddings OpenAI"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [[{ "node": "Pinecone Vector Store", "type": "main", "index": 0 }]]
+    },
+    "Default Data Loader": {
+      "ai_document": [[{ "node": "Pinecone Vector Store", "type": "ai_document", "index": 0 }]]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [[{ "node": "Pinecone Vector Store", "type": "ai_embedding", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  }
+}
